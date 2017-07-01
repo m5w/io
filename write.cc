@@ -33,9 +33,9 @@ std::ostream &Write<n>::write(std::ostream &os, const std::uint64_t &x) {
   if (x > maximum_x)
     return Write<n + 1>::write(os, x);
 
-  std::cerr << "n = " << n << "\n"
-                              "x = "
-            << x << "\n";
+  char s[n];
+  copy_least_significant_bytes(s, maximum_s_index, n);
+  s[0] |= mask;
 
 #if ENABLE_DEBUG
 
@@ -45,7 +45,7 @@ std::ostream &Write<n>::write(std::ostream &os, const std::uint64_t &x) {
 
 #endif
 
-  return os;
+  return os.write(s, n);
 }
 
 std::ostream &Write<1>::write(std::ostream &os, const std::uint64_t &x) {
@@ -63,10 +63,6 @@ std::ostream &Write<1>::write(std::ostream &os, const std::uint64_t &x) {
   if (x > maximum_x)
     return Write<2>::write(os, x);
 
-  std::cerr << "n = 1\n"
-               "x = "
-            << x << "\n";
-
 #if ENABLE_DEBUG
 
   std::cerr
@@ -75,7 +71,7 @@ std::ostream &Write<1>::write(std::ostream &os, const std::uint64_t &x) {
 
 #endif
 
-  return os;
+  return os.put(x);
 }
 
 std::ostream &Write<9>::write(std::ostream &os, const std::uint64_t &x) {
@@ -90,9 +86,9 @@ std::ostream &Write<9>::write(std::ostream &os, const std::uint64_t &x) {
 
 #endif
 
-  std::cerr << "n = 9\n"
-               "x = "
-            << x << "\n";
+  char s[9];
+  copy_least_significant_bytes(s + 1, 7, x);
+  *s = mask;
 
 #if ENABLE_DEBUG
 
@@ -102,7 +98,21 @@ std::ostream &Write<9>::write(std::ostream &os, const std::uint64_t &x) {
 
 #endif
 
-  return os;
+  return os.write(s, 9);
+}
+
+void copy_least_significant_bytes(char *s, std::size_t maximum_s_index,
+                                  std::uint64_t x) {
+  for (;;) {
+    unsigned char byte = x;
+    s[maximum_s_index] = byte;
+
+    if (maximum_s_index == 0)
+      break;
+
+    x >>= 8;
+    --maximum_s_index;
+  }
 }
 
 std::ostream &write(std::ostream &os, const std::uint64_t &x) {

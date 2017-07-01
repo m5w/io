@@ -43,6 +43,9 @@ public:
   // matter, as this is still O(1) and all must happen at compile-time.
   static constexpr std::uint64_t maximum_x =
       ((Write<n - 1>::maximum_x + 1) << 7) - 1;
+
+  static constexpr std::size_t maximum_s_index = n - 1;
+  static constexpr unsigned char mask = Write<n + 1>::mask << 1;
 };
 
 template <> class Write<1> {
@@ -54,9 +57,22 @@ public:
 template <> class Write<9> {
 public:
   static inline std::ostream &write(std::ostream &os, const std::uint64_t &x);
+  static constexpr unsigned char mask = 0b11111111;
 };
 
 }
+
+// Copy the (maximum_s_index + 1) least significant bytes of x to s.
+//
+// This copies the least-significant byte of x to the maximum_s_index-th
+// (starting at zero) element of s.  s is a byte array that must have at least
+// n = maximum_s_index + 1 elements; otherwise, the behavior of this function
+// is undefined.  The second-least-significant byte of x is then copied to the
+// (maximum_s_index - 1)-th element of s.  This continues until something is
+// copied into the first element of s.  Note that if n is larger than the size
+// of x in bytes, then the first (n - sizeof x) bytes of s will be set to zero.
+void copy_least_significant_bytes(char *s, std::size_t maximum_s_index,
+                                  std::uint64_t x);
 
 } // end namespace lttoolbox
 
