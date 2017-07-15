@@ -1,0 +1,5 @@
+cmake_minimum_required (VERSION 3.1)
+project (write)
+set (CMAKE_CXX_STANDARD 11)
+add_library (write write.cc)
+target_compile_definitions (write PUBLIC $<$<CONFIG:Debug>:ENABLE_DEBUG>)

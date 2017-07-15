@@ -1,0 +1,6 @@
+cmake_minimum_required (VERSION 3.1)
+project(tests)
+set (CMAKE_CXX_STANDARD 11)
+add_executable (testwrite testwrite.cc)
+target_link_libraries (testwrite write)
+target_compile_definitions (testwrite PUBLIC $<$<CONFIG:Debug>:ENABLE_DEBUG>)
