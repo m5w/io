@@ -1,3 +1,4 @@
 -x
 c++
--std=gnu++11
+-I/home/matthew/git/write/write
+-std=gnu++14

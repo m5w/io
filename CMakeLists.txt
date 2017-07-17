@@ -1,4 +1,6 @@
 cmake_minimum_required (VERSION 3.1)
 project (write)
+include_directories (${PROJECT_SOURCE_DIR}/write)
+set (CMAKE_CXX_STANDARD 14)
 add_subdirectory (write)
 add_subdirectory (tests)
