@@ -1,7 +1,9 @@
+*.a
 *.swp
+/.color_coded
+/.ycm_extra_conf.py
+/tests/testwrite
 CMakeCache.txt
 CMakeFiles/
 Makefile
 cmake_install.cmake
-*.a
-/tests/testwrite
