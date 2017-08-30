@@ -24,6 +24,8 @@
 
 #include "write.h"
 
+#if ENABLE_DEBUG
+
 template <class T> auto ord(const T &c) -> decltype(+c) { return +c; }
 
 template <class InputIterator>
@@ -62,6 +64,8 @@ void print(InputIterator first, InputIterator last) {
   std::cerr.flags(flags);
 }
 
+#endif
+
 template <std::size_t N>
 bool test_write_write(const std::uint64_t &x, std::array<unsigned char, N> s) {
   std::basic_stringstream<unsigned char> os;
@@ -70,7 +74,8 @@ bool test_write_write(const std::uint64_t &x, std::array<unsigned char, N> s) {
 
 #if ENABLE_DEBUG
 
-  std::cerr << "diff s str\n";
+  std::cerr << "\n"
+               "diff s str\n";
 
 #endif
 

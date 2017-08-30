@@ -17,75 +17,76 @@
 
 namespace lttoolbox {
 
+auto write(std::basic_ostream<std::uint8_t> &os, const std::uint64_t &x)
+    -> decltype(os) {
+  return Write<1>::write(os, x);
+}
+
 template <std::size_t n>
-std::basic_ostream<unsigned char> &
-Write<n>::write(std::basic_ostream<unsigned char> &os, const std::uint64_t &x) {
-
+auto Write<n>::write(std::basic_ostream<std::uint8_t> &os,
+                     const std::uint64_t &x) -> decltype(os) {
 #if ENABLE_DEBUG
-
-  std::cerr << "in std::basic_ostream<unsigned char> &\n"
-               "Write<"
-            << n << ">::write(\n"
-                    "    std::basic_ostream<unsigned char> &os,\n"
-                    "    const std::uint64_t &x):\n"
-                    "x = "
-            << x << "\n";
-
+  print_in_write(n, x, indent.c_str());
 #endif
 
-  if (x > maximum_x)
+  if (x > maximum_x) {
+#if ENABLE_DEBUG
+    print_x_above_maximum_x(x, maximum_x, indent.c_str());
+#endif
     return Write<n + 1>::write(os, x);
+  }
 
-  unsigned char s[n];
+#if ENABLE_DEBUG
+  print_x_not_above_maximum_x(x, maximum_x, indent.c_str());
+#endif
+  std::uint8_t s[n];
   copy_least_significant_bytes(s, maximum_s_index, x);
   s[0] |= mask;
   return os.write(s, n);
 }
 
-std::basic_ostream<unsigned char> &
-Write<1>::write(std::basic_ostream<unsigned char> &os, const std::uint64_t &x) {
-
 #if ENABLE_DEBUG
-
-  std::cerr << "in std::basic_ostream<unsigned char> &\n"
-               "Write<1>::write(\n"
-               "    std::basic_ostream<unsigned char> &os,\n"
-               "    const std::uint64_t &x):\n"
-               "x = "
-            << x << "\n";
-
+template <std::size_t n> const std::string Write<n>::indent((n - 1) * 2, ' ');
 #endif
 
-  if (x > maximum_x)
-    return Write<2>::write(os, x);
+auto Write<1>::write(std::basic_ostream<std::uint8_t> &os,
+                     const std::uint64_t &x) -> decltype(os) {
+#if ENABLE_DEBUG
+  print_in_write(1, x);
+#endif
 
+  if (x > maximum_x) {
+#if ENABLE_DEBUG
+    print_x_above_maximum_x(x, maximum_x);
+#endif
+    return Write<2>::write(os, x);
+  }
+
+#if ENABLE_DEBUG
+  print_x_not_above_maximum_x(x, maximum_x);
+#endif
   return os.put(x);
 }
 
-std::basic_ostream<unsigned char> &
-Write<9>::write(std::basic_ostream<unsigned char> &os, const std::uint64_t &x) {
-
+auto Write<9>::write(std::basic_ostream<std::uint8_t> &os,
+                     const std::uint64_t &x) -> decltype(os) {
 #if ENABLE_DEBUG
-
-  std::cerr << "in std::basic_ostream<unsigned char> &\n"
-               "Write<9>::write(\n"
-               "    std::basic_ostream<unsigned char> &os,\n"
-               "    const std::uint64_t &x):\n"
-               "x = "
-            << x << "\n";
-
+  print_in_write(9, x, indent.c_str());
 #endif
-
-  unsigned char s[9];
+  std::uint8_t s[9];
   copy_least_significant_bytes(s + 1, 7, x);
   *s = mask;
   return os.write(s, 9);
 }
 
-void copy_least_significant_bytes(unsigned char *s, std::size_t maximum_s_index,
+#if ENABLE_DEBUG
+const std::string Write<9>::indent(16, ' ');
+#endif
+
+void copy_least_significant_bytes(std::uint8_t *s, std::size_t maximum_s_index,
                                   std::uint64_t x) {
   for (;;) {
-    unsigned char byte = x;
+    std::uint8_t byte = x;
     s[maximum_s_index] = byte;
 
     if (maximum_s_index == 0)
@@ -96,9 +97,19 @@ void copy_least_significant_bytes(unsigned char *s, std::size_t maximum_s_index,
   }
 }
 
-std::basic_ostream<unsigned char> &write(std::basic_ostream<unsigned char> &os,
-                                         const std::uint64_t &x) {
-  return Write<1>::write(os, x);
+#if ENABLE_DEBUG
+std::ostream &print_in_write(const std::size_t &n, const std::uint64_t &x,
+                             const char *indent) {
+  return std::cerr << '\n'
+                   << indent << "+-auto Write<" << n << ">::write(\n"
+                   << indent << "|     std::basic_ostream<std::uint8_t>\n"
+                   << indent << "|         &os,\n"
+                   << indent << "|     const std::uint64_t\n"
+                   << indent << "|         &x)\n"
+                   << indent << "|     -> decltype(\n"
+                   << indent << "|         os)’:\n"
+                   << indent << "+-x is " << x << '\n';
 }
+#endif
 
 } // end namespace lttoolbox
