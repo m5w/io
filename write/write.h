@@ -23,15 +23,14 @@
 
 namespace lttoolbox {
 
-std::basic_ostream<unsigned char> &write(std::basic_ostream<unsigned char> &os,
-                                         const std::uint64_t &x);
+auto write(std::ostream &os, const std::uint64_t &x) -> decltype(os);
 
 namespace {
 
 template <std::size_t n> class Write {
 public:
-  static inline std::basic_ostream<unsigned char> &
-  write(std::basic_ostream<unsigned char> &os, const std::uint64_t &x);
+  static inline auto write(std::ostream &os, const std::uint64_t &x)
+      -> decltype(os);
 
   // The previous Write's maximum_x must be left-shifted by seven, and seven
   // ones must be inserted from the right.  However, left-shifting introduces
@@ -47,21 +46,21 @@ public:
       ((Write<n - 1>::maximum_x + 1) << 7) - 1;
 
   static constexpr std::size_t maximum_s_index = n - 1;
-  static constexpr unsigned char mask = Write<n + 1>::mask << 1;
+  static constexpr char mask = Write<n + 1>::mask << 1;
 };
 
 template <> class Write<1> {
 public:
-  static inline std::basic_ostream<unsigned char> &
-  write(std::basic_ostream<unsigned char> &os, const std::uint64_t &x);
+  static inline auto write(std::ostream &os, const std::uint64_t &x)
+      -> decltype(os);
   static constexpr std::uint64_t maximum_x = 0b01111111;
 };
 
 template <> class Write<9> {
 public:
-  static inline std::basic_ostream<unsigned char> &
-  write(std::basic_ostream<unsigned char> &os, const std::uint64_t &x);
-  static constexpr unsigned char mask = 0b11111111;
+  static inline auto write(std::ostream &os, const std::uint64_t &x)
+      -> decltype(os);
+  static constexpr char mask = 0b11111111;
 };
 }
 
@@ -74,7 +73,7 @@ public:
 // (maximum_s_index - 1)-th element of s.  This continues until something is
 // copied into the first element of s.  Note that if n is larger than the size
 // of x in bytes, then the first (n - sizeof x) bytes of s will be set to zero.
-void copy_least_significant_bytes(unsigned char *s, std::size_t maximum_s_index,
+void copy_least_significant_bytes(char *s, std::size_t maximum_s_index,
                                   std::uint64_t x);
 
 } // end namespace lttoolbox

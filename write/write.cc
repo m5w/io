@@ -18,15 +18,14 @@
 namespace lttoolbox {
 
 template <std::size_t n>
-std::basic_ostream<unsigned char> &
-Write<n>::write(std::basic_ostream<unsigned char> &os, const std::uint64_t &x) {
+std::ostream &Write<n>::write(std::ostream &os, const std::uint64_t &x) {
 
 #if ENABLE_DEBUG
 
-  std::cerr << "in std::basic_ostream<unsigned char> &\n"
+  std::cerr << "in std::ostream &\n"
                "Write<"
             << n << ">::write(\n"
-                    "    std::basic_ostream<unsigned char> &os,\n"
+                    "    std::ostream &os,\n"
                     "    const std::uint64_t &x):\n"
                     "x = "
             << x << "\n";
@@ -36,20 +35,19 @@ Write<n>::write(std::basic_ostream<unsigned char> &os, const std::uint64_t &x) {
   if (x > maximum_x)
     return Write<n + 1>::write(os, x);
 
-  unsigned char s[n];
+  char s[n];
   copy_least_significant_bytes(s, maximum_s_index, x);
   s[0] |= mask;
   return os.write(s, n);
 }
 
-std::basic_ostream<unsigned char> &
-Write<1>::write(std::basic_ostream<unsigned char> &os, const std::uint64_t &x) {
+std::ostream &Write<1>::write(std::ostream &os, const std::uint64_t &x) {
 
 #if ENABLE_DEBUG
 
-  std::cerr << "in std::basic_ostream<unsigned char> &\n"
+  std::cerr << "in std::ostream &\n"
                "Write<1>::write(\n"
-               "    std::basic_ostream<unsigned char> &os,\n"
+               "    std::ostream &os,\n"
                "    const std::uint64_t &x):\n"
                "x = "
             << x << "\n";
@@ -62,30 +60,29 @@ Write<1>::write(std::basic_ostream<unsigned char> &os, const std::uint64_t &x) {
   return os.put(x);
 }
 
-std::basic_ostream<unsigned char> &
-Write<9>::write(std::basic_ostream<unsigned char> &os, const std::uint64_t &x) {
+std::ostream &Write<9>::write(std::ostream &os, const std::uint64_t &x) {
 
 #if ENABLE_DEBUG
 
-  std::cerr << "in std::basic_ostream<unsigned char> &\n"
+  std::cerr << "in std::ostream &\n"
                "Write<9>::write(\n"
-               "    std::basic_ostream<unsigned char> &os,\n"
+               "    std::ostream &os,\n"
                "    const std::uint64_t &x):\n"
                "x = "
             << x << "\n";
 
 #endif
 
-  unsigned char s[9];
+  char s[9];
   copy_least_significant_bytes(s + 1, 7, x);
   *s = mask;
   return os.write(s, 9);
 }
 
-void copy_least_significant_bytes(unsigned char *s, std::size_t maximum_s_index,
+void copy_least_significant_bytes(char *s, std::size_t maximum_s_index,
                                   std::uint64_t x) {
   for (;;) {
-    unsigned char byte = x;
+    char byte = x;
     s[maximum_s_index] = byte;
 
     if (maximum_s_index == 0)
@@ -96,8 +93,7 @@ void copy_least_significant_bytes(unsigned char *s, std::size_t maximum_s_index,
   }
 }
 
-std::basic_ostream<unsigned char> &write(std::basic_ostream<unsigned char> &os,
-                                         const std::uint64_t &x) {
+std::ostream &write(std::ostream &os, const std::uint64_t &x) {
   return Write<1>::write(os, x);
 }
 
