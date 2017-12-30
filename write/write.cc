@@ -18,7 +18,8 @@
 namespace lttoolbox {
 
 template <std::size_t n>
-std::ostream &Write<n>::write(std::ostream &os, const std::uint64_t &x) {
+auto Write<n>::write(std::ostream &os, const std::uint64_t &x)
+    -> decltype(os) {
 
 #if ENABLE_DEBUG
 
@@ -41,7 +42,8 @@ std::ostream &Write<n>::write(std::ostream &os, const std::uint64_t &x) {
   return os.write(s, n);
 }
 
-std::ostream &Write<1>::write(std::ostream &os, const std::uint64_t &x) {
+auto Write<1>::write(std::ostream &os, const std::uint64_t &x)
+    -> decltype(os) {
 
 #if ENABLE_DEBUG
 
@@ -60,7 +62,8 @@ std::ostream &Write<1>::write(std::ostream &os, const std::uint64_t &x) {
   return os.put(x);
 }
 
-std::ostream &Write<9>::write(std::ostream &os, const std::uint64_t &x) {
+auto Write<9>::write(std::ostream &os, const std::uint64_t &x)
+    -> decltype(os) {
 
 #if ENABLE_DEBUG
 
@@ -93,7 +96,7 @@ void copy_least_significant_bytes(char *s, std::size_t maximum_s_index,
   }
 }
 
-std::ostream &write(std::ostream &os, const std::uint64_t &x) {
+auto write(std::ostream &os, const std::uint64_t &x) -> decltype(os) {
   return Write<1>::write(os, x);
 }
 
