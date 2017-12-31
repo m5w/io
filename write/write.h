@@ -36,14 +36,14 @@ public:
   static constexpr char mask = ~static_cast<char>((1ull << (9ull - n)) - 1ull);
 };
 
-template <> class Write<1> {
+template <> class Write<1ull> {
 public:
   static inline auto write(std::ostream &os, const std::uint64_t &x)
       -> decltype(os);
   static constexpr std::uint64_t maximum_x = (1ull << 7ull) - 1ull;
 };
 
-template <> class Write<8> {
+template <> class Write<8ull> {
 public:
   static inline auto write(std::ostream &os, const std::uint64_t &x)
       -> decltype(os);
@@ -51,7 +51,7 @@ public:
   static constexpr char mask = ~static_cast<char>((1ull << 1ull) - 1ull);
 };
 
-template <> class Write<9> {
+template <> class Write<9ull> {
 public:
   static inline auto write(std::ostream &os, const std::uint64_t &x)
       -> decltype(os);

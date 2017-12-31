@@ -18,46 +18,46 @@
 namespace lttoolbox {
 
 auto write(std::ostream &os, const std::uint64_t &x) -> decltype(os) {
-  return Write<1>::write(os, x);
+  return Write<1ull>::write(os, x);
 }
 
 template <std::size_t n>
 auto Write<n>::write(std::ostream &os, const std::uint64_t &x)
     -> decltype(os) {
   if (x > Write<n>::maximum_x)
-    return Write<n + 1>::write(os, x);
+    return Write<n + 1ull>::write(os, x);
 
   char s[n];
   copy_least_significant_bytes(s, Write<n>::maximum_s_index, x);
-  s[0] |= Write<n>::mask;
+  s[0ull] |= Write<n>::mask;
   return os.write(s, n);
 }
 
-auto Write<1>::write(std::ostream &os, const std::uint64_t &x)
+auto Write<1ull>::write(std::ostream &os, const std::uint64_t &x)
     -> decltype(os) {
-  if (x > Write<1>::maximum_x)
-    return Write<2>::write(os, x);
+  if (x > Write<1ull>::maximum_x)
+    return Write<2ull>::write(os, x);
 
   return os.put(x);
 }
 
-auto Write<8>::write(std::ostream &os, const std::uint64_t &x)
+auto Write<8ull>::write(std::ostream &os, const std::uint64_t &x)
     -> decltype(os) {
-  if (x > Write<8>::maximum_x)
-    return Write<9>::write(os, x);
+  if (x > Write<8ull>::maximum_x)
+    return Write<9ull>::write(os, x);
 
-  char s[8];
-  copy_least_significant_bytes(s + 1, 6, x);
-  *s = Write<8>::mask;
-  return os.write(s, 8);
+  char s[8ull];
+  copy_least_significant_bytes(s + 1ull, 6ull, x);
+  *s = Write<8ull>::mask;
+  return os.write(s, 8ull);
 }
 
-auto Write<9>::write(std::ostream &os, const std::uint64_t &x)
+auto Write<9ull>::write(std::ostream &os, const std::uint64_t &x)
     -> decltype(os) {
-  char s[9];
-  copy_least_significant_bytes(s + 1, 7, x);
-  *s = Write<9>::mask;
-  return os.write(s, 9);
+  char s[9ull];
+  copy_least_significant_bytes(s + 1ull, 7ull, x);
+  *s = Write<9ull>::mask;
+  return os.write(s, 9ull);
 }
 
 void copy_least_significant_bytes(char *s, std::size_t maximum_s_index,
@@ -66,10 +66,10 @@ void copy_least_significant_bytes(char *s, std::size_t maximum_s_index,
     char byte = x;
     s[maximum_s_index] = byte;
 
-    if (maximum_s_index == 0)
+    if (maximum_s_index == 0ull)
       break;
 
-    x >>= 8;
+    x >>= 8ull;
     --maximum_s_index;
   }
 }
