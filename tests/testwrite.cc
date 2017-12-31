@@ -24,7 +24,7 @@
 
 #include "write.h"
 
-template <class T> auto ord(const T &c) -> decltype(+c) { return +c; }
+static inline unsigned int ord(const char &c);
 
 template <class InputIterator>
 void print(InputIterator first, InputIterator last) {
@@ -38,24 +38,33 @@ void print(InputIterator first, InputIterator last) {
   // affects another ASCII value.
   const auto &fill = std::cerr.fill('0');
 
+  std::size_t length = last - first;
+
+  if (length % 2ull == 1ull) {
+    if (length == 1ull) {
+      std::cerr << std::setw(2) << ord(*first) << std::setw(0);
+      goto finally;
+    }
+
+    std::cerr << std::setw(2) << ord(*first) << std::setw(0) << ' ';
+    ++first;
+  }
+
   // A space must be printed after every other ASCII value -- except the last
   // one.  Therefore, the last ASCII value must be printed after the loop, and
   // the loop must print each of the preceeding pairs of ASCII values, each
-  // pair followed by a space.  The loop must end with one element remaining.
-  --last;
+  // pair followed by a space.  The loop must end with two elements remaining.
+  last -= 2ull;
 
-  for (; first != last; ++first) {
-    std::cerr << std::setw(2) << ord(*first);
-    ++first;
-
-    if (first == last)
-      break;
-
-    std::cerr << std::setw(2) << ord(*first);
-    std::cerr << ' ';
+  for (; first != last; first += 2ull) {
+    std::cerr << std::setw(2) << ord(*first) << ord(*(first + 1))
+              << std::setw(0) << ' ';
   }
 
-  std::cerr << std::setw(2) << ord(*first);
+  std::cerr << std::setw(2) << ord(*first) << ord(*(first + 1))
+            << std::setw(0);
+
+finally:
 
   // Reset the properties of ``std::cerr`` in the order in which they were set.
   std::cerr.fill(fill);
@@ -166,4 +175,8 @@ BOOST_AUTO_TEST_CASE(testwrite_test_write_write) {
       0xff'ff'ff'ff'ff'ff'ff'ff,
       std::array<char, 9>({'\xff', '\xff', '\xff', '\xff', '\xff', '\xff',
                            '\xff', '\xff', '\xff'})));
+}
+
+unsigned int ord(const char &c) {
+  return static_cast<std::uint_fast16_t>(static_cast<unsigned char>(c));
 }

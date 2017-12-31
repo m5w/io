@@ -17,68 +17,46 @@
 
 namespace lttoolbox {
 
+auto write(std::ostream &os, const std::uint64_t &x) -> decltype(os) {
+  return Write<1>::write(os, x);
+}
+
 template <std::size_t n>
 auto Write<n>::write(std::ostream &os, const std::uint64_t &x)
     -> decltype(os) {
-
-#if ENABLE_DEBUG
-
-  std::cerr << "in std::ostream &\n"
-               "Write<"
-            << n << ">::write(\n"
-                    "    std::ostream &os,\n"
-                    "    const std::uint64_t &x):\n"
-                    "x = "
-            << x << "\n";
-
-#endif
-
-  if (x > maximum_x)
+  if (x > Write<n>::maximum_x)
     return Write<n + 1>::write(os, x);
 
   char s[n];
-  copy_least_significant_bytes(s, maximum_s_index, x);
-  s[0] |= mask;
+  copy_least_significant_bytes(s, Write<n>::maximum_s_index, x);
+  s[0] |= Write<n>::mask;
   return os.write(s, n);
 }
 
 auto Write<1>::write(std::ostream &os, const std::uint64_t &x)
     -> decltype(os) {
-
-#if ENABLE_DEBUG
-
-  std::cerr << "in std::ostream &\n"
-               "Write<1>::write(\n"
-               "    std::ostream &os,\n"
-               "    const std::uint64_t &x):\n"
-               "x = "
-            << x << "\n";
-
-#endif
-
-  if (x > maximum_x)
+  if (x > Write<1>::maximum_x)
     return Write<2>::write(os, x);
 
   return os.put(x);
 }
 
+auto Write<8>::write(std::ostream &os, const std::uint64_t &x)
+    -> decltype(os) {
+  if (x > Write<8>::maximum_x)
+    return Write<9>::write(os, x);
+
+  char s[8];
+  copy_least_significant_bytes(s + 1, 6, x);
+  *s = Write<8>::mask;
+  return os.write(s, 8);
+}
+
 auto Write<9>::write(std::ostream &os, const std::uint64_t &x)
     -> decltype(os) {
-
-#if ENABLE_DEBUG
-
-  std::cerr << "in std::ostream &\n"
-               "Write<9>::write(\n"
-               "    std::ostream &os,\n"
-               "    const std::uint64_t &x):\n"
-               "x = "
-            << x << "\n";
-
-#endif
-
   char s[9];
   copy_least_significant_bytes(s + 1, 7, x);
-  *s = mask;
+  *s = Write<9>::mask;
   return os.write(s, 9);
 }
 
@@ -94,10 +72,6 @@ void copy_least_significant_bytes(char *s, std::size_t maximum_s_index,
     x >>= 8;
     --maximum_s_index;
   }
-}
-
-auto write(std::ostream &os, const std::uint64_t &x) -> decltype(os) {
-  return Write<1>::write(os, x);
 }
 
 } // end namespace lttoolbox
