@@ -92,17 +92,6 @@ static inline void copy_least_significant_bytes(char *s_rbegin, char *const s,
 }
 }
 
-#if ENABLE_DEBUG
-std::ostream &print_in_write(const std::size_t &n, const std::uint64_t &x,
-                             const char *indent = "");
-std::ostream &print_x_above_maximum_x(const std::uint64_t &x,
-                                      const std::uint64_t &maximum_x,
-                                      const char *indent = "");
-std::ostream &print_x_not_above_maximum_x(const std::uint64_t &x,
-                                          const std::uint64_t &maximum_x,
-                                          const char *indent = "");
-#endif
-
 } // end namespace lttoolbox
 
 #endif
