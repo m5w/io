@@ -37,7 +37,7 @@ auto Read<n>::read(std::istream &is, std::uint64_t &x, const unsigned char c)
       << (8ull * n);
   char s[n];
   is.read(s, n);
-  copy_least_significant_bytes(x, s, Read<n>::maximum_s_index);
+  copy_least_significant_bytes(x, s, Read<n>::s_distance_bit);
   return is;
 }
 
@@ -70,7 +70,7 @@ auto Read<7ull>::read(std::istream &is, std::uint64_t &x,
   x = 0ull;
   char s[7ull];
   is.read(s, 7ull);
-  copy_least_significant_bytes(x, s, 6ull);
+  copy_least_significant_bytes(x, s, 48ull);
   return is;
 }
 
@@ -79,7 +79,7 @@ auto Read<8ull>::read(std::istream &is, std::uint64_t &x,
   x = 0ull;
   char s[8ull];
   is.read(s, 8ull);
-  copy_least_significant_bytes(x, s, 7ull);
+  copy_least_significant_bytes(x, s, 56ull);
   return is;
 }
 

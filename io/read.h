@@ -41,7 +41,7 @@ public:
                           const unsigned char c) -> decltype(is);
   static constexpr unsigned char mask = get_mask(n);
   static constexpr unsigned char maximum_c = get_maximum_c(Read<n>::mask);
-  static constexpr std::size_t maximum_s_index = n - 1ull;
+  static constexpr std::size_t s_distance_bit = 8ull * (n - 1ull);
 };
 
 template <> class Read<0ull> {
@@ -74,10 +74,10 @@ public:
 
 static inline void copy_least_significant_bytes(std::uint64_t &x,
                                                 const char *s,
-                                                std::size_t maximum_s_index) {
-  for (; maximum_s_index != 0ull; --maximum_s_index) {
+                                                std::size_t s_distance_bit) {
+  for (; s_distance_bit != 0ull; s_distance_bit -= 8ull) {
     x |= static_cast<std::uint64_t>(static_cast<unsigned char>(*s))
-         << (8ull * maximum_s_index);
+         << s_distance_bit;
     ++s;
   }
 
