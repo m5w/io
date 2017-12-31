@@ -57,11 +57,11 @@ void print(InputIterator first, InputIterator last) {
   last -= 2ull;
 
   for (; first != last; first += 2ull) {
-    std::cerr << std::setw(2) << ord(*first) << ord(*(first + 1))
+    std::cerr << std::setw(2) << ord(*first) << ord(*(first + 1ull))
               << std::setw(0) << ' ';
   }
 
-  std::cerr << std::setw(2) << ord(*first) << ord(*(first + 1))
+  std::cerr << std::setw(2) << ord(*first) << ord(*(first + 1ull))
             << std::setw(0);
 
 finally:
@@ -102,79 +102,86 @@ bool test_write_write(const std::uint64_t &x, std::array<char, N> s) {
 }
 
 BOOST_AUTO_TEST_CASE(testwrite_test_write_write) {
-  BOOST_CHECK(test_write_write(0x00, std::array<char, 1>({'\x00'})));
-  BOOST_CHECK(test_write_write(0x40, std::array<char, 1>({'\x40'})));
-  BOOST_CHECK(test_write_write(0x7f, std::array<char, 1>({'\x7f'})));
-  BOOST_CHECK(test_write_write(0x80, std::array<char, 2>({'\x80', '\x80'})));
+  BOOST_CHECK(test_write_write(0x00ull, std::array<char, 1ull>({'\x00'})));
+  BOOST_CHECK(test_write_write(0x40ull, std::array<char, 1ull>({'\x40'})));
+  BOOST_CHECK(test_write_write(0x7full, std::array<char, 1ull>({'\x7f'})));
   BOOST_CHECK(
-      test_write_write(0x20'10, std::array<char, 2>({'\xa0', '\x10'})));
+      test_write_write(0x80ull, std::array<char, 2ull>({'\x80', '\x80'})));
   BOOST_CHECK(
-      test_write_write(0x3f'ff, std::array<char, 2>({'\xbf', '\xff'})));
-  BOOST_CHECK(test_write_write(0x40'00,
-                               std::array<char, 3>({'\xc0', '\x40', '\x00'})));
-  BOOST_CHECK(test_write_write(0x10'08'04,
-                               std::array<char, 3>({'\xd0', '\x08', '\x04'})));
-  BOOST_CHECK(test_write_write(0x1f'ff'ff,
-                               std::array<char, 3>({'\xdf', '\xff', '\xff'})));
-  BOOST_CHECK(test_write_write(
-      0x20'00'00, std::array<char, 4>({'\xe0', '\x20', '\x00', '\x00'})));
-  BOOST_CHECK(test_write_write(
-      0x08'04'02'01, std::array<char, 4>({'\xe8', '\x04', '\x02', '\x01'})));
-  BOOST_CHECK(test_write_write(
-      0x0f'ff'ff'ff, std::array<char, 4>({'\xef', '\xff', '\xff', '\xff'})));
-  BOOST_CHECK(test_write_write(
-      0x10'00'00'00,
-      std::array<char, 5>({'\xf0', '\x10', '\x00', '\x00', '\x00'})));
-  BOOST_CHECK(test_write_write(
-      0x04'02'01'80'40,
-      std::array<char, 5>({'\xf4', '\x02', '\x01', '\x80', '\x40'})));
-  BOOST_CHECK(test_write_write(
-      0x07'ff'ff'ff'ff,
-      std::array<char, 5>({'\xf7', '\xff', '\xff', '\xff', '\xff'})));
-  BOOST_CHECK(test_write_write(
-      0x08'00'00'00'00,
-      std::array<char, 6>({'\xf8', '\x08', '\x00', '\x00', '\x00', '\x00'})));
-  BOOST_CHECK(test_write_write(
-      0x02'01'80'40'20'10,
-      std::array<char, 6>({'\xfa', '\x01', '\x80', '\x40', '\x20', '\x10'})));
-  BOOST_CHECK(test_write_write(
-      0x03'ff'ff'ff'ff'ff,
-      std::array<char, 6>({'\xfb', '\xff', '\xff', '\xff', '\xff', '\xff'})));
-  BOOST_CHECK(test_write_write(
-      0x04'00'00'00'00'00, std::array<char, 7>({'\xfc', '\x04', '\x00', '\x00',
-                                                '\x00', '\x00', '\x00'})));
+      test_write_write(0x20'10ull, std::array<char, 2ull>({'\xa0', '\x10'})));
   BOOST_CHECK(
-      test_write_write(0x01'80'40'20'10'08'04,
-                       std::array<char, 7>({'\xfd', '\x80', '\x40', '\x20',
-                                            '\x10', '\x08', '\x04'})));
-  BOOST_CHECK(
-      test_write_write(0x01'ff'ff'ff'ff'ff'ff,
-                       std::array<char, 7>({'\xfd', '\xff', '\xff', '\xff',
-                                            '\xff', '\xff', '\xff'})));
-  BOOST_CHECK(
-      test_write_write(0x02'00'00'00'00'00'00,
-                       std::array<char, 8>({'\xfe', '\x02', '\x00', '\x00',
-                                            '\x00', '\x00', '\x00', '\x00'})));
-  BOOST_CHECK(
-      test_write_write(0x80'40'20'10'08'04'02,
-                       std::array<char, 8>({'\xfe', '\x80', '\x40', '\x20',
-                                            '\x10', '\x08', '\x04', '\x02'})));
-  BOOST_CHECK(
-      test_write_write(0xff'ff'ff'ff'ff'ff'ff,
-                       std::array<char, 8>({'\xfe', '\xff', '\xff', '\xff',
-                                            '\xff', '\xff', '\xff', '\xff'})));
+      test_write_write(0x3f'ffull, std::array<char, 2ull>({'\xbf', '\xff'})));
   BOOST_CHECK(test_write_write(
-      0x01'00'00'00'00'00'00'00,
-      std::array<char, 9>({'\xff', '\x01', '\x00', '\x00', '\x00', '\x00',
-                           '\x00', '\x00', '\x00'})));
+      0x40'00ull, std::array<char, 3ull>({'\xc0', '\x40', '\x00'})));
   BOOST_CHECK(test_write_write(
-      0x80'40'20'10'08'04'02'01,
-      std::array<char, 9>({'\xff', '\x80', '\x40', '\x20', '\x10', '\x08',
-                           '\x04', '\x02', '\x01'})));
+      0x10'08'04ull, std::array<char, 3ull>({'\xd0', '\x08', '\x04'})));
   BOOST_CHECK(test_write_write(
-      0xff'ff'ff'ff'ff'ff'ff'ff,
-      std::array<char, 9>({'\xff', '\xff', '\xff', '\xff', '\xff', '\xff',
-                           '\xff', '\xff', '\xff'})));
+      0x1f'ff'ffull, std::array<char, 3ull>({'\xdf', '\xff', '\xff'})));
+  BOOST_CHECK(test_write_write(
+      0x20'00'00ull,
+      std::array<char, 4ull>({'\xe0', '\x20', '\x00', '\x00'})));
+  BOOST_CHECK(test_write_write(
+      0x08'04'02'01ull,
+      std::array<char, 4ull>({'\xe8', '\x04', '\x02', '\x01'})));
+  BOOST_CHECK(test_write_write(
+      0x0f'ff'ff'ffull,
+      std::array<char, 4ull>({'\xef', '\xff', '\xff', '\xff'})));
+  BOOST_CHECK(test_write_write(
+      0x10'00'00'00ull,
+      std::array<char, 5ull>({'\xf0', '\x10', '\x00', '\x00', '\x00'})));
+  BOOST_CHECK(test_write_write(
+      0x04'02'01'80'40ull,
+      std::array<char, 5ull>({'\xf4', '\x02', '\x01', '\x80', '\x40'})));
+  BOOST_CHECK(test_write_write(
+      0x07'ff'ff'ff'ffull,
+      std::array<char, 5ull>({'\xf7', '\xff', '\xff', '\xff', '\xff'})));
+  BOOST_CHECK(test_write_write(
+      0x08'00'00'00'00ull, std::array<char, 6ull>({'\xf8', '\x08', '\x00',
+                                                   '\x00', '\x00', '\x00'})));
+  BOOST_CHECK(
+      test_write_write(0x02'01'80'40'20'10ull,
+                       std::array<char, 6ull>(
+                           {'\xfa', '\x01', '\x80', '\x40', '\x20', '\x10'})));
+  BOOST_CHECK(
+      test_write_write(0x03'ff'ff'ff'ff'ffull,
+                       std::array<char, 6ull>(
+                           {'\xfb', '\xff', '\xff', '\xff', '\xff', '\xff'})));
+  BOOST_CHECK(
+      test_write_write(0x04'00'00'00'00'00ull,
+                       std::array<char, 7ull>({'\xfc', '\x04', '\x00', '\x00',
+                                               '\x00', '\x00', '\x00'})));
+  BOOST_CHECK(
+      test_write_write(0x01'80'40'20'10'08'04ull,
+                       std::array<char, 7ull>({'\xfd', '\x80', '\x40', '\x20',
+                                               '\x10', '\x08', '\x04'})));
+  BOOST_CHECK(
+      test_write_write(0x01'ff'ff'ff'ff'ff'ffull,
+                       std::array<char, 7ull>({'\xfd', '\xff', '\xff', '\xff',
+                                               '\xff', '\xff', '\xff'})));
+  BOOST_CHECK(test_write_write(
+      0x02'00'00'00'00'00'00ull,
+      std::array<char, 8ull>(
+          {'\xfe', '\x02', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00'})));
+  BOOST_CHECK(test_write_write(
+      0x80'40'20'10'08'04'02ull,
+      std::array<char, 8ull>(
+          {'\xfe', '\x80', '\x40', '\x20', '\x10', '\x08', '\x04', '\x02'})));
+  BOOST_CHECK(test_write_write(
+      0xff'ff'ff'ff'ff'ff'ffull,
+      std::array<char, 8ull>(
+          {'\xfe', '\xff', '\xff', '\xff', '\xff', '\xff', '\xff', '\xff'})));
+  BOOST_CHECK(test_write_write(
+      0x01'00'00'00'00'00'00'00ull,
+      std::array<char, 9ull>({'\xff', '\x01', '\x00', '\x00', '\x00', '\x00',
+                              '\x00', '\x00', '\x00'})));
+  BOOST_CHECK(test_write_write(
+      0x80'40'20'10'08'04'02'01ull,
+      std::array<char, 9ull>({'\xff', '\x80', '\x40', '\x20', '\x10', '\x08',
+                              '\x04', '\x02', '\x01'})));
+  BOOST_CHECK(test_write_write(
+      0xff'ff'ff'ff'ff'ff'ff'ffull,
+      std::array<char, 9ull>({'\xff', '\xff', '\xff', '\xff', '\xff', '\xff',
+                              '\xff', '\xff', '\xff'})));
 }
 
 unsigned int ord(const char &c) {
