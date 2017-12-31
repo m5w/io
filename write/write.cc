@@ -60,17 +60,4 @@ auto Write<9ull>::write(std::ostream &os, const std::uint64_t &x)
   return os.write(s, 9ull);
 }
 
-void copy_least_significant_bytes(char *s_rbegin, char *const s,
-                                  std::uint64_t x) {
-  for (;;) {
-    *s_rbegin = x;
-
-    if (s_rbegin == s)
-      break;
-
-    x >>= 8ull;
-    --s_rbegin;
-  }
-}
-
 } // end namespace lttoolbox
