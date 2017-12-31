@@ -31,8 +31,7 @@ namespace {
 
 static constexpr std::uint64_t get_maximum_x(const std::size_t n,
                                              const char mask) {
-  return ((static_cast<unsigned char>(~mask) + 1ull)
-          << (8ull * (n - 1ull) - 1ull)) -
+  return ((static_cast<unsigned char>(~mask) + 1ull) << (8ull * n - 1ull)) -
          1ull;
 }
 
@@ -42,10 +41,10 @@ public:
       -> decltype(os);
   static constexpr char mask = get_mask(n);
   static constexpr std::uint64_t maximum_x = get_maximum_x(n, Write<n>::mask);
-  static constexpr std::size_t maximum_s_index = n - 1ull;
+  static constexpr std::size_t s_size = n + 1ull;
 };
 
-template <> class Write<1ull> {
+template <> class Write<0ull> {
 public:
   static inline auto write(std::ostream &os, const std::uint64_t &x)
       -> decltype(os);
@@ -54,16 +53,16 @@ public:
       1ull;
 };
 
-template <> class Write<8ull> {
+template <> class Write<7ull> {
 public:
   static inline auto write(std::ostream &os, const std::uint64_t &x)
       -> decltype(os);
-  static constexpr char mask = get_mask(8ull);
+  static constexpr char mask = get_mask(7ull);
   static constexpr std::uint64_t maximum_x =
-      get_maximum_x(8ull, Write<8ull>::mask);
+      get_maximum_x(7ull, Write<7ull>::mask);
 };
 
-template <> class Write<9ull> {
+template <> class Write<8ull> {
 public:
   static inline auto write(std::ostream &os, const std::uint64_t &x)
       -> decltype(os);
@@ -79,11 +78,8 @@ public:
 // which is the (n - 2)-th element of s.  This continues until something is
 // copied into the first element of s.  Note that if n is larger than the size
 // of x in bytes, then the first (n - sizeof x) bytes of s will be set to zero.
-void copy_least_significant_bytes(char *s_rbegin, char *const s,
-                                  std::uint64_t x);
-
-void copy_least_significant_bytes(char *s_rbegin, char *const s,
-                                  std::uint64_t x) {
+static inline void copy_least_significant_bytes(char *s_rbegin, char *const s,
+                                                std::uint64_t x) {
   for (;;) {
     *s_rbegin = x;
 

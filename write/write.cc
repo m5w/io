@@ -18,7 +18,7 @@
 namespace lttoolbox {
 
 auto write(std::ostream &os, const std::uint64_t &x) -> decltype(os) {
-  return Write<1ull>::write(os, x);
+  return Write<0ull>::write(os, x);
 }
 
 template <std::size_t n>
@@ -27,36 +27,36 @@ auto Write<n>::write(std::ostream &os, const std::uint64_t &x)
   if (x > Write<n>::maximum_x)
     return Write<n + 1ull>::write(os, x);
 
-  char s[n];
-  copy_least_significant_bytes(s + maximum_s_index, s, x);
+  char s[Write<n>::s_size];
+  copy_least_significant_bytes(s + n, s, x);
   s[0ull] |= Write<n>::mask;
-  return os.write(s, n);
+  return os.write(s, Write<n>::s_size);
 }
 
-auto Write<1ull>::write(std::ostream &os, const std::uint64_t &x)
+auto Write<0ull>::write(std::ostream &os, const std::uint64_t &x)
     -> decltype(os) {
-  if (x > Write<1ull>::maximum_x)
-    return Write<2ull>::write(os, x);
+  if (x > Write<0ull>::maximum_x)
+    return Write<1ull>::write(os, x);
 
   return os.put(x);
 }
 
-auto Write<8ull>::write(std::ostream &os, const std::uint64_t &x)
+auto Write<7ull>::write(std::ostream &os, const std::uint64_t &x)
     -> decltype(os) {
-  if (x > Write<8ull>::maximum_x)
-    return Write<9ull>::write(os, x);
+  if (x > Write<7ull>::maximum_x)
+    return Write<8ull>::write(os, x);
 
   char s[8ull];
   copy_least_significant_bytes(s + 7ull, s + 1ull, x);
-  *s = Write<8ull>::mask;
+  *s = Write<7ull>::mask;
   return os.write(s, 8ull);
 }
 
-auto Write<9ull>::write(std::ostream &os, const std::uint64_t &x)
+auto Write<8ull>::write(std::ostream &os, const std::uint64_t &x)
     -> decltype(os) {
   char s[9ull];
   copy_least_significant_bytes(s + 8ull, s + 1ull, x);
-  *s = Write<9ull>::mask;
+  *s = Write<8ull>::mask;
   return os.write(s, 9ull);
 }
 
