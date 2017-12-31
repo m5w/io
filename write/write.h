@@ -30,7 +30,7 @@ auto write(std::ostream &os, const std::uint64_t &x) -> decltype(os);
 namespace {
 
 static constexpr std::uint64_t get_maximum_x(const std::size_t n,
-                                             const char mask) {
+                                             const unsigned char mask) {
   return ((static_cast<unsigned char>(~mask) + 1ull) << (8ull * n - 1ull)) -
          1ull;
 }
@@ -39,7 +39,7 @@ template <std::size_t n> class Write {
 public:
   static inline auto write(std::ostream &os, const std::uint64_t &x)
       -> decltype(os);
-  static constexpr char mask = get_mask(n);
+  static constexpr unsigned char mask = get_mask(n);
   static constexpr std::uint64_t maximum_x = get_maximum_x(n, Write<n>::mask);
   static constexpr std::size_t s_size = n + 1ull;
 };
@@ -49,15 +49,14 @@ public:
   static inline auto write(std::ostream &os, const std::uint64_t &x)
       -> decltype(os);
   static constexpr std::uint64_t maximum_x =
-      ((static_cast<unsigned char>(~static_cast<char>(0ull)) + 1ull) >> 1ull) -
-      1ull;
+      ((static_cast<unsigned char>(~0ull) + 1ull) >> 1ull) - 1ull;
 };
 
 template <> class Write<7ull> {
 public:
   static inline auto write(std::ostream &os, const std::uint64_t &x)
       -> decltype(os);
-  static constexpr char mask = get_mask(7ull);
+  static constexpr unsigned char mask = get_mask(7ull);
   static constexpr std::uint64_t maximum_x =
       get_maximum_x(7ull, Write<7ull>::mask);
 };
@@ -66,7 +65,7 @@ template <> class Write<8ull> {
 public:
   static inline auto write(std::ostream &os, const std::uint64_t &x)
       -> decltype(os);
-  static constexpr char mask = ~static_cast<char>(0ull);
+  static constexpr unsigned char mask = static_cast<unsigned char>(~0ull);
 };
 
 // Copy the n = s_rbegin - s + 1 least significant bytes of x to s.

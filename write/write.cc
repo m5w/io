@@ -35,6 +35,7 @@ auto Write<n>::write(std::ostream &os, const std::uint64_t &x)
 
 auto Write<0ull>::write(std::ostream &os, const std::uint64_t &x)
     -> decltype(os) {
+  auto y = maximum_x;
   if (x > Write<0ull>::maximum_x)
     return Write<1ull>::write(os, x);
 

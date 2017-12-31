@@ -21,8 +21,14 @@ auto read(std::istream &is, std::uint64_t &x) -> decltype(is) {
   return Read<0ull>::read(is, x, is.get());
 }
 
+std::uint64_t read(std::istream &is) {
+  std::uint64_t x;
+  read(is, x);
+  return x;
+}
+
 template <std::size_t n>
-auto Read<n>::read(std::istream &is, std::uint64_t &x, const char c)
+auto Read<n>::read(std::istream &is, std::uint64_t &x, const unsigned char c)
     -> decltype(is) {
   if (c > Read<n>::maximum_c)
     return Read<n + 1ull>::read(is, x, c);
@@ -35,8 +41,8 @@ auto Read<n>::read(std::istream &is, std::uint64_t &x, const char c)
   return is;
 }
 
-auto Read<0ull>::read(std::istream &is, std::uint64_t &x, const char c)
-    -> decltype(is) {
+auto Read<0ull>::read(std::istream &is, std::uint64_t &x,
+                      const unsigned char c) -> decltype(is) {
   if (c > Read<0ull>::maximum_c)
     return Read<1ull>::read(is, x, c);
 
@@ -44,8 +50,8 @@ auto Read<0ull>::read(std::istream &is, std::uint64_t &x, const char c)
   return is;
 }
 
-auto Read<1ull>::read(std::istream &is, std::uint64_t &x, const char c)
-    -> decltype(is) {
+auto Read<1ull>::read(std::istream &is, std::uint64_t &x,
+                      const unsigned char c) -> decltype(is) {
   if (c > Read<1ull>::maximum_c)
     return Read<2ull>::read(is, x, c);
 
@@ -56,8 +62,8 @@ auto Read<1ull>::read(std::istream &is, std::uint64_t &x, const char c)
   return is;
 }
 
-auto Read<7ull>::read(std::istream &is, std::uint64_t &x, const char c)
-    -> decltype(is) {
+auto Read<7ull>::read(std::istream &is, std::uint64_t &x,
+                      const unsigned char c) -> decltype(is) {
   if (c > Read<7ull>::maximum_c)
     return Read<8ull>::read(is, x, c);
 
@@ -68,8 +74,8 @@ auto Read<7ull>::read(std::istream &is, std::uint64_t &x, const char c)
   return is;
 }
 
-auto Read<8ull>::read(std::istream &is, std::uint64_t &x, const char c)
-    -> decltype(is) {
+auto Read<8ull>::read(std::istream &is, std::uint64_t &x,
+                      const unsigned char c) -> decltype(is) {
   x = 0ull;
   char s[8ull];
   is.read(s, 8ull);

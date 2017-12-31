@@ -20,8 +20,8 @@
 
 namespace lttoolbox {
 
-constexpr char get_mask(const std::size_t n) {
-  return ~static_cast<char>((1ull << (8ull - n)) - 1ull);
+constexpr unsigned char get_mask(const std::size_t n) {
+  return ~static_cast<unsigned char>((1ull << (8ull - n)) - 1ull);
 }
 
 } // end namespace lttoolbox
