@@ -18,7 +18,7 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <iostream>
+
 #include <ostream>
 
 namespace lttoolbox {
@@ -31,24 +31,34 @@ template <std::size_t n> class Write {
 public:
   static inline auto write(std::ostream &os, const std::uint64_t &x)
       -> decltype(os);
-  static constexpr std::uint64_t maximum_x = (1ull << (7ull * n)) - 1ull;
+
+#define WRITE(N)                                                              \
+  static constexpr char mask =                                                \
+      ~static_cast<char>((1ull << (9ull - N)) - 1ull);                        \
+  static constexpr std::uint64_t maximum_x =                                  \
+      ((static_cast<unsigned char>(~mask) + 1ull) << (8ull * (N - 1) - 1)) -  \
+      1ull
+
+  WRITE(n);
   static constexpr std::size_t maximum_s_index = n - 1ull;
-  static constexpr char mask = ~static_cast<char>((1ull << (9ull - n)) - 1ull);
 };
 
 template <> class Write<1ull> {
 public:
   static inline auto write(std::ostream &os, const std::uint64_t &x)
       -> decltype(os);
-  static constexpr std::uint64_t maximum_x = (1ull << 7ull) - 1ull;
+  static constexpr std::uint64_t maximum_x =
+      ((static_cast<unsigned char>(~static_cast<char>(0ull)) + 1ull) >> 1ull) -
+      1ull;
 };
 
 template <> class Write<8ull> {
 public:
   static inline auto write(std::ostream &os, const std::uint64_t &x)
       -> decltype(os);
-  static constexpr std::uint64_t maximum_x = (1ull << 56ull) - 1ull;
-  static constexpr char mask = ~static_cast<char>((1ull << 1ull) - 1ull);
+  WRITE(8ull);
+
+#undef WRITE
 };
 
 template <> class Write<9ull> {
@@ -59,16 +69,16 @@ public:
 };
 }
 
-// Copy the (maximum_s_index + 1) least significant bytes of x to s.
+// Copy the n = s_rbegin - s + 1 least significant bytes of x to s.
 //
-// This copies the least-significant byte of x to the maximum_s_index-th
-// (starting at zero) element of s.  s is a byte array that must have at least
-// n = maximum_s_index + 1 elements; otherwise, the behavior of this function
-// is undefined.  The second-least-significant byte of x is then copied to the
-// (maximum_s_index - 1)-th element of s.  This continues until something is
+// This copies the least-significant byte of x to *s_rbegin, which is the (n -
+// 1)-th (starting at zero) element of s.  s is a byte array that must have at
+// least n elements; otherwise, the behavior of this function is undefined.
+// The second-least-significant byte of x is then copied to *(s_rbegin - 1),
+// which is the (n - 2)-th element of s.  This continues until something is
 // copied into the first element of s.  Note that if n is larger than the size
 // of x in bytes, then the first (n - sizeof x) bytes of s will be set to zero.
-void copy_least_significant_bytes(char *s, std::size_t maximum_s_index,
+void copy_least_significant_bytes(char *s_rbegin, char *const s,
                                   std::uint64_t x);
 
 } // end namespace lttoolbox

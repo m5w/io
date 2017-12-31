@@ -185,5 +185,5 @@ BOOST_AUTO_TEST_CASE(testwrite_test_write_write) {
 }
 
 unsigned int ord(const char &c) {
-  return static_cast<std::uint_fast16_t>(static_cast<unsigned char>(c));
+  return static_cast<unsigned char>(c);
 }

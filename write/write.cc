@@ -28,7 +28,7 @@ auto Write<n>::write(std::ostream &os, const std::uint64_t &x)
     return Write<n + 1ull>::write(os, x);
 
   char s[n];
-  copy_least_significant_bytes(s, Write<n>::maximum_s_index, x);
+  copy_least_significant_bytes(s + maximum_s_index, s, x);
   s[0ull] |= Write<n>::mask;
   return os.write(s, n);
 }
@@ -47,7 +47,7 @@ auto Write<8ull>::write(std::ostream &os, const std::uint64_t &x)
     return Write<9ull>::write(os, x);
 
   char s[8ull];
-  copy_least_significant_bytes(s + 1ull, 6ull, x);
+  copy_least_significant_bytes(s + 7ull, s + 1ull, x);
   *s = Write<8ull>::mask;
   return os.write(s, 8ull);
 }
@@ -55,22 +55,21 @@ auto Write<8ull>::write(std::ostream &os, const std::uint64_t &x)
 auto Write<9ull>::write(std::ostream &os, const std::uint64_t &x)
     -> decltype(os) {
   char s[9ull];
-  copy_least_significant_bytes(s + 1ull, 7ull, x);
+  copy_least_significant_bytes(s + 8ull, s + 1ull, x);
   *s = Write<9ull>::mask;
   return os.write(s, 9ull);
 }
 
-void copy_least_significant_bytes(char *s, std::size_t maximum_s_index,
+void copy_least_significant_bytes(char *s_rbegin, char *const s,
                                   std::uint64_t x) {
   for (;;) {
-    char byte = x;
-    s[maximum_s_index] = byte;
+    *s_rbegin = x;
 
-    if (maximum_s_index == 0ull)
+    if (s_rbegin == s)
       break;
 
     x >>= 8ull;
-    --maximum_s_index;
+    --s_rbegin;
   }
 }
 
