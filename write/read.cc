@@ -23,10 +23,53 @@ auto Read<n>::read(std::istream &is, std::uint64_t &x, const char c)
   if (c > Read<n>::maximum_c)
     return Read<n + 1ull>::read(is, x);
 
-  x |= static_cast<unsigned char>(c ^ Read<n>::mask) << (8ull * n);
+  x = static_cast<std::uint64_t>(static_cast<unsigned char>(c ^ Read<n>::mask))
+      << (8ull * n);
   char s[n];
   is.read(s, n);
   copy_least_significant_bytes(x, s, Read<n>::maximum_s_index);
+  return is;
+}
+
+auto Read<0ull>::read(std::istream &is, std::uint64_t &x, const char c)
+    -> decltype(is) {
+  if (c > Read<0ull>::maximum_c)
+    return Read<1ull>::read(is, x, c);
+
+  x = static_cast<unsigned char>(c);
+  return is;
+}
+
+auto Read<1ull>::read(std::istream &is, std::uint64_t &x, const char c)
+    -> decltype(is) {
+  if (c > Read<1ull>::maximum_c)
+    return Read<2ull>::read(is, x, c);
+
+  x = static_cast<std::uint64_t>(
+          static_cast<unsigned char>(c ^ Read<1ull>::mask))
+      << 8ull;
+  x |= static_cast<unsigned char>(is.get());
+  return is;
+}
+
+auto Read<7ull>::read(std::istream &is, std::uint64_t &x, const char c)
+    -> decltype(is) {
+  if (c > Read<7ull>::maximum_c)
+    return Read<8ull>::read(is, x, c);
+
+  x = 0ull;
+  char s[7ull];
+  is.read(s, 7ull);
+  copy_least_significant_bytes(x, s, 6ull);
+  return is;
+}
+
+auto Read<8ull>::read(std::istream &is, std::uint64_t &x, const char c)
+    -> decltype(is) {
+  x = 0ull;
+  char s[8ull];
+  is.read(s, 8ull);
+  copy_least_significant_bytes(x, s, 7ull);
   return is;
 }
 
