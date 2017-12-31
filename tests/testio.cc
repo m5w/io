@@ -1,17 +1,17 @@
-// This file is part of write.
+// This file is part of io.
 //
-// write is free software: you can redistribute it and/or modify
+// io is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// write is distributed in the hope that it will be useful,
+// io is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with write.  If not, see <http://www.gnu.org/licenses/>.
+// along with io.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <algorithm>
 #include <array>
@@ -19,7 +19,7 @@
 #include <iostream>
 #include <sstream>
 
-#define BOOST_TEST_MODULE testwrite
+#define BOOST_TEST_MODULE testio
 #include <boost/test/included/unit_test.hpp>
 
 #include "read.h"
@@ -31,11 +31,11 @@ template <class InputIterator>
 static void print(InputIterator first, InputIterator last);
 
 template <std::size_t n>
-static bool test_write_x_s(const std::uint64_t x,
-                           const std::array<char, n> &s);
+static void test_read_s_x(const std::array<char, n> &s, const std::uint64_t x);
 
 template <std::size_t n>
-static void test_read_s_x(const std::array<char, n> &s, const std::uint64_t x);
+static bool test_write_x_s(const std::uint64_t x,
+                           const std::array<char, n> &s);
 
 BOOST_AUTO_TEST_CASE(test_write) {
   BOOST_CHECK(test_write_x_s(0x00ull, std::array<char, 1ull>({'\x00'})));
@@ -233,6 +233,13 @@ finally:
 }
 
 template <std::size_t n>
+void test_read_s_x(const std::array<char, n> &s, const std::uint64_t x) {
+  std::stringstream is;
+  is.write(s.data(), n);
+  BOOST_CHECK_EQUAL(x, lttoolbox::read(is));
+}
+
+template <std::size_t n>
 bool test_write_x_s(const std::uint64_t x, const std::array<char, n> &s) {
   std::stringstream os;
   lttoolbox::write(os, x);
@@ -261,11 +268,4 @@ bool test_write_x_s(const std::uint64_t x, const std::array<char, n> &s) {
 #endif
 
   return false;
-}
-
-template <std::size_t n>
-void test_read_s_x(const std::array<char, n> &s, const std::uint64_t x) {
-  std::stringstream is;
-  is.write(s.data(), n);
-  BOOST_CHECK_EQUAL(x, lttoolbox::read(is));
 }

@@ -1,3 +1,3 @@
-add_executable (testwrite testwrite.cc)
-target_link_libraries (testwrite ${Boost_LIBRARIES} write read)
-target_compile_definitions (testwrite PUBLIC $<$<CONFIG:Debug>:ENABLE_DEBUG>)
+add_executable (testio testio.cc)
+target_link_libraries (testio ${Boost_LIBRARIES} read write)
+target_compile_definitions (testio PUBLIC $<$<CONFIG:Debug>:ENABLE_DEBUG>)
