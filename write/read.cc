@@ -17,11 +17,15 @@
 
 namespace lttoolbox {
 
+auto read(std::istream &is, std::uint64_t &x) -> decltype(is) {
+  return Read<0ull>::read(is, x, is.get());
+}
+
 template <std::size_t n>
 auto Read<n>::read(std::istream &is, std::uint64_t &x, const char c)
     -> decltype(is) {
   if (c > Read<n>::maximum_c)
-    return Read<n + 1ull>::read(is, x);
+    return Read<n + 1ull>::read(is, x, c);
 
   x = static_cast<std::uint64_t>(static_cast<unsigned char>(c ^ Read<n>::mask))
       << (8ull * n);
