@@ -179,7 +179,10 @@ unsigned int ord(const char &c) { return static_cast<unsigned char>(c); }
 template <class InputIterator>
 auto print(std::ostream &os, InputIterator first, InputIterator last)
     -> decltype(os) {
-  const auto &flags{os.setf(os.hex, os.basefield)};
+  if (first == last)
+    return os;
+
+  const auto flags{os.setf(os.hex, os.basefield)};
 
   // Set this next because it affects output only when the field width of `os`
   // is set.  The field width is reset after each ASCII value is printed, so,
@@ -187,39 +190,25 @@ auto print(std::ostream &os, InputIterator first, InputIterator last)
   // not do so "contiguously" -- that is, it affects the representation of one
   // ASCII value, then no longer affects the output, and then affects the
   // representation of another ASCII value.
-  const auto &fill{os.fill('0')};
+  const auto fill{os.fill('0')};
 
-  const auto &wide{os.width()};
+  if ((last - first) % 2ull == 1ull) {
+    --last;
 
-  {
-    std::size_t length{last - first};
+    for (; first != last; first += 2ull)
+      os << std::setw(2) << ord(*first) << std::setw(2) << ord(*(first + 1))
+         << ' ';
 
-    if (length % 2ull == 1ull) {
-      if (length == 1ull) {
-        os << std::setw(2) << ord(*first) << std::setw(wide);
-        goto finally;
-      }
+    os << std::setw(2) << ord(*first);
+  } else {
+    last -= 2ull;
 
-      os << std::setw(2) << ord(*first) << std::setw(wide) << ' ';
-      ++first;
-    }
+    for (; first != last; first += 2ull)
+      os << std::setw(2) << ord(*first) << std::setw(2) << ord(*(first + 1))
+         << ' ';
+
+    os << std::setw(2) << ord(*first) << std::setw(2) << ord(*(first + 1));
   }
-
-  // This function must print a space after every other ASCII value except the
-  // last one.  Therefore, the loop prints each preceeding pair of ASCII
-  // values, each followed by a space, and then this function prints the last
-  // pair of ASCII values.  The loop must terminate with two ASCII values
-  // remaining.
-  last -= 2ull;
-
-  for (; first != last; first += 2ull) {
-    os << std::setw(2) << ord(*first) << ord(*(first + 1ull))
-       << std::setw(wide) << ' ';
-  }
-
-  os << std::setw(2) << ord(*first) << ord(*(first + 1ull)) << std::setw(wide);
-
-finally:
 
   // Reset the properties of `os` in the order in which they were set.
   os.fill(fill);
@@ -229,10 +218,9 @@ finally:
 
 static auto print(std::ostream &os, const std::uint64_t x) -> decltype(os) {
   const auto &flags{os.setf(os.hex, os.basefield)};
+  os.setf(os.showbase);
   const auto &fill{os.fill('0')};
-  const auto &wide{os.width(16ull)};
   os << x;
-  os.width(wide);
   os.fill(fill);
   os.flags(flags);
   return os;
@@ -262,13 +250,21 @@ bool test_encode(const std::uint64_t x, const std::array<char, n> &s) {
 
 #if ENABLE_DEBUG
 
-  std::cerr << "< ";
-  print(std::cerr, s.cbegin(), s.cend());
-  std::cerr << "\n"
-               "---\n"
-               "> ";
-  print(std::cerr, encoded.cbegin(), encoded.cend());
-  std::cerr << '\n';
+  if (encoded.size() == 0ull) {
+    std::cerr << "1d0\n"
+                 "< ";
+    print(std::cerr, s.cbegin(), s.cend());
+    std::cerr << '\n';
+  } else {
+    std::cerr << "1c1\n"
+                 "< ";
+    print(std::cerr, s.cbegin(), s.cend());
+    std::cerr << "\n"
+                 "---\n"
+                 "> ";
+    print(std::cerr, encoded.cbegin(), encoded.cend());
+    std::cerr << '\n';
+  }
 
 #endif
 
@@ -293,7 +289,8 @@ bool test_decode(const std::array<char, n> &s, const std::uint64_t x) {
 
 #if ENABLE_DEBUG
 
-  std::cerr << "< ";
+  std::cerr << "1c1\n"
+               "< ";
   print(std::cerr, x);
   std::cerr << "\n"
                "---\n"
