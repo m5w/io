@@ -13,51 +13,51 @@
 // You should have received a copy of the GNU General Public License
 // along with io.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "write.h"
+#include "encode.h"
 
 namespace lttoolbox {
 
-auto write(std::ostream &os, const std::uint64_t &x) -> decltype(os) {
-  return Write<0ull>::write(os, x);
+auto encode(std::ostream &os, const std::uint64_t &x) -> decltype(os) {
+  return Encoder<0ull>::encode(os, x);
 }
 
 template <std::size_t n>
-auto Write<n>::write(std::ostream &os, const std::uint64_t &x)
+auto Encoder<n>::encode(std::ostream &os, const std::uint64_t &x)
     -> decltype(os) {
-  if (x > Write<n>::maximum_x)
-    return Write<n + 1ull>::write(os, x);
+  if (x > Encoder<n>::maximum_x)
+    return Encoder<n + 1ull>::encode(os, x);
 
-  char s[Write<n>::s_size];
+  char s[Encoder<n>::s_size];
   copy_least_significant_bytes(s + n, s, x);
-  s[0ull] |= Write<n>::mask;
-  return os.write(s, Write<n>::s_size);
+  s[0ull] |= Encoder<n>::mask;
+  return os.write(s, Encoder<n>::s_size);
 }
 
-auto Write<0ull>::write(std::ostream &os, const std::uint64_t &x)
+auto Encoder<0ull>::encode(std::ostream &os, const std::uint64_t &x)
     -> decltype(os) {
   auto y = maximum_x;
-  if (x > Write<0ull>::maximum_x)
-    return Write<1ull>::write(os, x);
+  if (x > Encoder<0ull>::maximum_x)
+    return Encoder<1ull>::encode(os, x);
 
   return os.put(x);
 }
 
-auto Write<7ull>::write(std::ostream &os, const std::uint64_t &x)
+auto Encoder<7ull>::encode(std::ostream &os, const std::uint64_t &x)
     -> decltype(os) {
-  if (x > Write<7ull>::maximum_x)
-    return Write<8ull>::write(os, x);
+  if (x > Encoder<7ull>::maximum_x)
+    return Encoder<8ull>::encode(os, x);
 
   char s[8ull];
   copy_least_significant_bytes(s + 7ull, s + 1ull, x);
-  *s = Write<7ull>::mask;
+  *s = Encoder<7ull>::mask;
   return os.write(s, 8ull);
 }
 
-auto Write<8ull>::write(std::ostream &os, const std::uint64_t &x)
+auto Encoder<8ull>::encode(std::ostream &os, const std::uint64_t &x)
     -> decltype(os) {
   char s[9ull];
   copy_least_significant_bytes(s + 8ull, s + 1ull, x);
-  *s = Write<8ull>::mask;
+  *s = Encoder<8ull>::mask;
   return os.write(s, 9ull);
 }
 

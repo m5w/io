@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with io.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef APERTIUM_LTTOOLBOX_READ_H
-#define APERTIUM_LTTOOLBOX_READ_H
+#ifndef APERTIUM_LTTOOLBOX_DECODE_H
+#define APERTIUM_LTTOOLBOX_DECODE_H
 
 #include <cstddef>
 #include <cstdint>
@@ -164,7 +164,7 @@ namespace lttoolbox {
 //          time saved by writing fewer bytes is greater than the time required
 //          to format the value for writing.
 //
-auto read(std::istream &is, std::uint64_t &x) -> decltype(is);
+auto decode(std::istream &is, std::uint64_t &x) -> decltype(is);
 
 namespace {
 
@@ -180,41 +180,42 @@ static constexpr unsigned char get_maximum_c(const unsigned char mask) {
       (static_cast<unsigned char>(~mask) + 1ull) >> 1ull);
 }
 
-template <std::size_t n> class Read {
+template <std::size_t n> class Decoder {
 public:
-  static inline auto read(std::istream &is, std::uint64_t &x,
-                          const unsigned char c) -> decltype(is);
+  static inline auto decode(std::istream &is, std::uint64_t &x,
+                            const unsigned char c) -> decltype(is);
   static constexpr unsigned char mask = get_mask(n);
-  static constexpr unsigned char maximum_c = get_maximum_c(Read<n>::mask);
+  static constexpr unsigned char maximum_c = get_maximum_c(Decoder<n>::mask);
   static constexpr std::size_t s_distance_bit = 8ull * (n - 1ull);
 };
 
-template <> class Read<0ull> {
+template <> class Decoder<0ull> {
 public:
-  static inline auto read(std::istream &is, std::uint64_t &x,
-                          const unsigned char c) -> decltype(is);
+  static inline auto decode(std::istream &is, std::uint64_t &x,
+                            const unsigned char c) -> decltype(is);
   static constexpr unsigned char maximum_c = get_maximum_c(get_mask(0ull));
 };
 
-template <> class Read<1ull> {
+template <> class Decoder<1ull> {
 public:
-  static inline auto read(std::istream &is, std::uint64_t &x,
-                          const unsigned char c) -> decltype(is);
+  static inline auto decode(std::istream &is, std::uint64_t &x,
+                            const unsigned char c) -> decltype(is);
   static constexpr unsigned char mask = get_mask(1ull);
-  static constexpr unsigned char maximum_c = get_maximum_c(Read<1ull>::mask);
+  static constexpr unsigned char maximum_c =
+      get_maximum_c(Decoder<1ull>::mask);
 };
 
-template <> class Read<7ull> {
+template <> class Decoder<7ull> {
 public:
-  static inline auto read(std::istream &is, std::uint64_t &x,
-                          const unsigned char c) -> decltype(is);
+  static inline auto decode(std::istream &is, std::uint64_t &x,
+                            const unsigned char c) -> decltype(is);
   static constexpr unsigned char maximum_c = get_maximum_c(get_mask(7ull));
 };
 
-template <> class Read<8ull> {
+template <> class Decoder<8ull> {
 public:
-  static inline auto read(std::istream &is, std::uint64_t &x,
-                          const unsigned char c) -> decltype(is);
+  static inline auto decode(std::istream &is, std::uint64_t &x,
+                            const unsigned char c) -> decltype(is);
 };
 
 static inline void copy_least_significant_bytes(std::uint64_t &x,

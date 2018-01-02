@@ -22,8 +22,8 @@
 #define BOOST_TEST_MODULE testio
 #include <boost/test/included/unit_test.hpp>
 
-#include "read.h"
-#include "write.h"
+#include "decode.h"
+#include "encode.h"
 
 static inline unsigned int ord(const char &c);
 template <class InputIterator>
@@ -235,7 +235,7 @@ void test(const std::uint64_t x, const std::array<char, n> &s) {
 template <std::size_t n>
 bool test_encode(const std::uint64_t x, const std::array<char, n> &s) {
   std::ostringstream os{};
-  lttoolbox::write(os, x);
+  lttoolbox::encode(os, x);
   const std::string &encoded{os.str()};
 
 #if ENABLE_DEBUG
@@ -274,7 +274,7 @@ template <std::size_t n>
 bool test_decode(const std::array<char, n> &s, const std::uint64_t x) {
   std::istringstream is{{s.data(), n}};
   std::uint64_t decoded{0ull};
-  lttoolbox::read(is, decoded);
+  lttoolbox::decode(is, decoded);
 
 #if ENABLE_DEBUG
 
