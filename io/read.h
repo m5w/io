@@ -73,70 +73,76 @@ namespace lttoolbox {
 //          for a data type between 57 and 63 bits in size, were such a data
 //          type to exist.
 //
-// Q: Why does a value's class matter, and
+// Q: What is the significance of a value's class, and
 // Q: how does a value affect the number of bytes used to encode it?
 //
-// Apertium binary format is designed to encode individual values in as few
-// bytes as possible, often encoding a value in fewer bytes than are used to
-// store the value in memory.  What allows this is assuming that any unwritten
-// bits of a value each are equal to zero and all are more significant than all
-// of the value's other bits.  As I/O is a bottleneck for speed, this makes
+// Apertium binary format is designed to encode an individual value in as few
+// bytes as possible, often doing so in fewer bytes than are used to store the
+// value in memory.  What allows this is assuming that any unwritten bits of a
+// value are equal to zero and more significant than all of the value's other
+// bits.  Thus, if a value to be encoded has any contiguous, most-significant
+// bits that are equal to zero ("leading zeros"), the encoding function may be
+// able to leave some or all of them unwritten.  How many of a value's leading
+// zeros that the encoding function leaves unwritten depends on how many
+// leading zeros that the value has, as the encoding function must encode a
+// value in an (integral) number of bytes.  When the encoding function leaves
+// some or all of a value's leading zeros unwritten, it does not need to write
+// as many bytes, and the decoding function will not need to read as many bytes
+// to decode the value.  Since I/O is a bottleneck for speed, this makes
 // encoding and decoding a value in Apertium binary format quite fast --
-// perhaps faster than without any encoding.[2]
+// perhaps faster than writing and reading the value without any encoding,
+// respectively.[2]
 //
-// A value with more contiguous, most-significant bits equal to zero than
-// another value is, with both values interpreted as unsigned integers, less
-// than the other value.  Of course, a lesser unsigned integer does not always
-// have more contiguous, most-significant bits equal to zero than does a
+// A value with more leading zeros than another value is, with both values
+// interpreted as unsigned integers, less than the other value.  Of course, a
+// lesser unsigned integer does not always have more leading zeros than a
 // greater unsigned integer, but, if an unsigned integer is sufficiently lesser
-// than another unsigned integer, this is true.  More of the bits of a value
-// with more contiguous, most-significant bits equal to zero than another
-// value may be left unwritten than those of the other value, and so, the
-// number of bytes used to encode a value with sufficiently more contiguous,
-// most-significant bits equal to zero than another value is less than that
-// used to encode the other value.
+// than another unsigned integer, this is true.  A value encoded in fewer bytes
+// than than another value has more leading zeros than the other value.  Of
+// course, a value with more leading zeros is not always encoded in fewer bytes
+// than a value with with fewer leading zeros, but, likewise, if a value has
+// sufficiently more leading zeros than another value, this is true.
 //
-// The classes are such that the number of bytes used to encode a value in the
-// i + 1th class is 1 greater than that used to encode a value in the ith
-// class.  1 byte is used to encode a value in the 0th class.  This function
-// must read i + 1 bytes to decode a value in the ith class -- or, as it more
-// specifically does, read i subsequent bytes after reading the first one.
+// A value in the i - 1th class has sufficiently more leading zeros than a
+// value in the ith class such that the value is encoded in 1 fewer byte.  1
+// byte is used to encode a value in the 0th class.  This function always reads
+// at least 1 byte; then, if i is greater than 0, the function reads i bytes.
+// Thus, this function always reads a total of i + 1 bytes to decode a value in
+// the ith class.
 //
 //    2.  ^ This hypothesis is untested.  This should come down to whether the
 //          time saved by writing fewer bytes is greater than the time required
 //          to format the value for writing.
 //
-// Q: How does this function determine how many bytes to read?
+// Q: How does this function determine a value's class from the first byte that
+//    the function reads?
 //
-// Since Apertium binary format must use at least one byte to encode any value,
-// this function first reads one byte from `is`.  The number of contiguous,
-// most-significant bits equal to one in this byte is the number of subsequent
-// bytes that this function must then read to decode the value.  This design is
-// similar to that of UTF-8.  There may be 0 contiguous most-significant bits
-// equal to one in the first byte, but, when there are between 0 and 7
-// (inclusive) most-significant bits equal to one in the first byte, there is a
-// terminating zero.  All of the subsequent bits, including those in subsequent
-// bytes, are the literal bits of the value.  It is important to note that this
-// sequence of bits is bytewise big-endian (and bitwise little-endian).
-// However, when there are 8 contiguous, most-significant bits in the first
-// byte equal to one -- and thus each of the first byte's bits is one -- there
-// is no terminating zero, and thus the 8 subsequent bytes are the literal
-// bytes of the value (and, again, are bytewise big-endian and bitwise
-// little-endian).
+// The number of contiguous, most-significant bits equal to one ("leading
+// ones") in the first byte is the value's class.  This design is similar to
+// that of UTF-8.  When there are between 0 and 7 leading ones in the first
+// byte, the bit immediately less significant than the least significant of the
+// leading ones is equal to zero ("terminating zero").  When there are 0
+// leading ones in the first byte, the terminating zero is the first byte's
+// most-significant bit.  All of the first byte's less-significant bits and all
+// of the bits in the following i bytes are the literal bits of the value.
+// This entire sequence of bits is bytewise big-endian (and bitwise
+// little-endian).  However, when there are 8 leading ones in the first byte --
+// and thus each of the first byte's bits is equal to one -- there is no
+// terminating zero. The 8 following bytes are the literal bytes of the value
+// (and, again, are bytewise big-endian and bitwise little-endian).
 //
-// When there are 0 contiguous most-significant bits equal to one --
-// henceforth, leading ones -- as in the following example,
+// When there are 0 leading ones in the first byte, as in the following
+// example,
 //
 //   0b0.......
 //
 // there is a terminating zero followed by 7 literal bits of a value.  Recall
-// that a value encoded in 1 byte is in the 0th class and thus between 0 and
-// 2**7 - 1 (inclusive), which is also the range of numbers that ASCII encodes:
-// 0 to 127 (inclusive).  Of course, one could also observe that there are 7
-// literal bits of a value, which can store an unsigned integer between 0 and
-// 2**7 - 1 (inclusive).  Thus, Apertium binary format encodes all of the
-// integers that ASCII encodes as ASCII encodes them.  When there is 1 leading
-// one,
+// that a value with 0 leading ones is in the 0th class and thus between 0 and
+// 2**7 - 1 (inclusive), which is the range of numbers that ASCII encodes.  One
+// could also observe that there are 7 literal bits of a value, and 7 bits can
+// store an unsigned integer between 0 and 2**7 - 1 (inclusive).  Thus,
+// Apertium binary format encodes all of the integers that ASCII encodes as
+// ASCII encodes them.  When there is 1 leading one,
 //
 //   0b10...... ........
 //
