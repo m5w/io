@@ -240,8 +240,7 @@ bool test_encode(const std::uint64_t x, const std::array<char, n> &s) {
 
 #if ENABLE_DEBUG
 
-  std::cerr << "\n"
-               "diff s encoded\n";
+  std::cerr << "diff s encoded\n";
 
 #endif
 
@@ -279,8 +278,7 @@ bool test_decode(const std::array<char, n> &s, const std::uint64_t x) {
 
 #if ENABLE_DEBUG
 
-  std::cerr << "\n"
-               "diff x decoded\n";
+  std::cerr << "diff x decoded\n";
 
 #endif
 
