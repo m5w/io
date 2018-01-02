@@ -234,16 +234,17 @@ finally:
 
 template <std::size_t n>
 void test_read_s_x(const std::array<char, n> &s, const std::uint64_t x) {
-  std::stringstream is;
-  is.write(s.data(), n);
-  BOOST_CHECK_EQUAL(x, lttoolbox::read(is));
+  std::istringstream is{{s.data(), n}};
+  std::uint64_t b{0ull};
+  lttoolbox::read(is, b);
+  BOOST_CHECK_EQUAL(b, x);
 }
 
 template <std::size_t n>
 bool test_write_x_s(const std::uint64_t x, const std::array<char, n> &s) {
-  std::stringstream os;
+  std::ostringstream os{};
   lttoolbox::write(os, x);
-  const std::string &str = os.str();
+  const std::string &str{os.str()};
 
 #if ENABLE_DEBUG
 

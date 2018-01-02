@@ -18,13 +18,9 @@
 namespace lttoolbox {
 
 auto read(std::istream &is, std::uint64_t &x) -> decltype(is) {
-  return Read<0ull>::read(is, x, is.get());
-}
-
-std::uint64_t read(std::istream &is) {
-  std::uint64_t x;
-  read(is, x);
-  return x;
+  char c{0};
+  is.get(c);
+  return Read<0ull>::read(is, x, c);
 }
 
 template <std::size_t n>
@@ -33,10 +29,10 @@ auto Read<n>::read(std::istream &is, std::uint64_t &x, const unsigned char c)
   if (c > Read<n>::maximum_c)
     return Read<n + 1ull>::read(is, x, c);
 
-  x = static_cast<std::uint64_t>(static_cast<unsigned char>(c ^ Read<n>::mask))
-      << (8ull * n);
   char s[n];
   is.read(s, n);
+  x = static_cast<std::uint64_t>(static_cast<unsigned char>(c ^ Read<n>::mask))
+      << (8ull * n);
   copy_least_significant_bytes(x, s, Read<n>::s_distance_bit);
   return is;
 }
@@ -55,10 +51,12 @@ auto Read<1ull>::read(std::istream &is, std::uint64_t &x,
   if (c > Read<1ull>::maximum_c)
     return Read<2ull>::read(is, x, c);
 
+  char s{0};
+  is.get(s);
   x = static_cast<std::uint64_t>(
           static_cast<unsigned char>(c ^ Read<1ull>::mask))
       << 8ull;
-  x |= static_cast<unsigned char>(is.get());
+  x |= static_cast<unsigned char>(s);
   return is;
 }
 
@@ -67,18 +65,18 @@ auto Read<7ull>::read(std::istream &is, std::uint64_t &x,
   if (c > Read<7ull>::maximum_c)
     return Read<8ull>::read(is, x, c);
 
-  x = 0ull;
   char s[7ull];
   is.read(s, 7ull);
+  x = 0ull;
   copy_least_significant_bytes(x, s, 48ull);
   return is;
 }
 
 auto Read<8ull>::read(std::istream &is, std::uint64_t &x,
                       const unsigned char c) -> decltype(is) {
-  x = 0ull;
   char s[8ull];
   is.read(s, 8ull);
+  x = 0ull;
   copy_least_significant_bytes(x, s, 56ull);
   return is;
 }
