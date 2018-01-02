@@ -69,10 +69,6 @@ namespace lttoolbox {
 // happen if the value were between 2**7 and 2**8 - 1 (inclusive).  It is
 // similar for other values less than 64 bits in size.[1]
 //
-//    1.  ^ It would not be computationally inefficient not to have an overload
-//          for a data type between 57 and 63 bits in size, were such a data
-//          type to exist.
-//
 // Q: What is the significance of a value's class, and
 // Q: how does a value affect the number of bytes used to encode it?
 //
@@ -109,10 +105,6 @@ namespace lttoolbox {
 // at least 1 byte; then, if i is greater than 0, the function reads i bytes.
 // Thus, this function always reads a total of i + 1 bytes to decode a value in
 // the ith class.
-//
-//    2.  ^ This hypothesis is untested.  This should come down to whether the
-//          time saved by writing fewer bytes is greater than the time required
-//          to format the value for writing.
 //
 // Q: How does this function determine a value's class from the first byte that
 //    the function reads?
@@ -163,6 +155,15 @@ namespace lttoolbox {
 // the value is in the 7th class, and if the any of the leading ones were
 // instead equal to zero, that would indicate that the value is in a lesser
 // class.  This leaves only `0b11111111`.
+//
+//    1.  ^ It would not be computationally inefficient not to have an overload
+//          for a data type between 57 and 63 bits in size, were such a data
+//          type to exist.
+//
+//    2.  ^ This hypothesis is untested.  This should come down to whether the
+//          time saved by writing fewer bytes is greater than the time required
+//          to format the value for writing.
+//
 auto read(std::istream &is, std::uint64_t &x) -> decltype(is);
 
 namespace {
