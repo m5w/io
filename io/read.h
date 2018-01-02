@@ -168,9 +168,13 @@ auto read(std::istream &is, std::uint64_t &x) -> decltype(is);
 
 namespace {
 
-// Return the maximum value (interpreted as an unsigned integer) of a first
-// byte of an Apertium binary format encoding for which the given leading ones
-// are still the leadings ones.
+// Return the maximum value of the first byte, when interpreted as an unsigned
+// integer, such that it has the same number of leading ones as the given byte.
+//
+// If any bits less significant than the terminating zero are equal to one,
+// this function's behavior is undefined.  Otherwise, this function returns the
+// given byte with all of its bits less significant than the terminating zero
+// inverted to be equal to one.
 static constexpr unsigned char get_maximum_c(const unsigned char mask) {
   return ~static_cast<unsigned char>(
       (static_cast<unsigned char>(~mask) + 1ull) >> 1ull);
