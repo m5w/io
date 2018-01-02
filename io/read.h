@@ -152,6 +152,17 @@ namespace lttoolbox {
 //   0b11111110 ........ ........ ........ ........ ........ ........ ........
 //
 // there is a terminating zero followed by 7 literal bytes of a value.
+//
+// Q: Why is there no terminating zero when there are 8 leading ones in the
+//    first byte?
+//
+// Since Apertium binary format can encode a value up to and including 64 bits
+// in size, the 8 following bytes can store any value that one may encode.
+// Thus, there is no 9th class, and so the first byte needs to indicate only
+// that the value is not in the 7th class.  If the first byte is `0b11111110`,
+// the value is in the 7th class, and if the any of the leading ones were
+// instead equal to zero, that would indicate that the value is in a lesser
+// class.  This leaves only `0b11111111`.
 auto read(std::istream &is, std::uint64_t &x) -> decltype(is);
 
 namespace {
