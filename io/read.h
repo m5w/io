@@ -25,7 +25,7 @@
 
 namespace lttoolbox {
 
-// Read a value encoded in Apertium binary format from `is` into `x` and then
+// Decode a value encoded in Apertium binary format from `is` into `x` and then
 // return `is`.
 //
 // This function's signature is similar to that of the following functions,
@@ -42,60 +42,117 @@ namespace lttoolbox {
 //
 // except that the this function is not a member of `std::istream`.
 //
-// One can encode an integer from 0 to 2**64 - 1 in Apertium binary format.
-// Thus, this function takes a reference to an unsigned 64-bit integer as an
-// argument.  However, one does not need to interpret a value encoded in
-// Apertium binary format as an unsigned 64-bit integer -- the data type simply
-// provides 64 bits of space.
+// One can encode any binary value 64 or fewer bits in size in Apertium binary
+// format.
 //
-// Q: Why would one use 64 bits of space to encode a value that one could
-// encode in fewer bits?
+// Q: Why are there not overloads for smaller data types?  Is this not
+//    inefficient?
 //
-// Apertium binary format uses the fewest possible number of bytes to encode an
-// unsigned 64-bit integer assuming leading zeros.  For integers between 0 and
-// 2**7 - 1 (inclusive), it uses 1 byte.  For integers between 2**7 and
-// 2**14 - 1 (inclusive), it uses 2 bytes.  This pattern of encoding 7 bits of
-// information per byte continues up to and including encoding integers between
-// 2**49 and 2**56 - 1 (inclusive) in 8 bytes.  However, Apertium binary format
-// encodes integers between 2**56 and 2**64 - 1 (inclusive) in 9 bytes.
+// Is this inefficient?  Yes and no.  It is computationally inefficient, but it
+// does not affect the number of bytes used to encode a value.  That number
+// depends only on the value to be encoded.  Such overloads should be added in
+// a future version.
 //
-// Q: How does this function know how many bytes to read?
+// Q: Why is it computationally inefficient not to have overloads for smaller
+//    data types?
 //
-// Since Apertium binary format must use at least one byte to encode any
-// value[1], this function first reads one byte from `is`.  The number of
-// leading ones in this byte is the number of subsequent bytes that this
-// function must then read to decode the value.  This design is similar to that
-// of UTF-8.  There may be 0 leading ones, but, when there are between 0 and 7
-// (inclusive) leading ones, there is a terminating zero.  All of the
-// subsequent bits, including those in subsequent bytes, are the literal bits
-// of the value.  It is important to note that this sequence of bits is
-// bytewise big-endian (and bitwise little-endian).  However, when there are 8
-// leading ones -- and thus each of the first byte's bits is one -- there is no
-// terminating zero, and thus the 8 subsequent bytes are the literal bytes of
-// the value (and, again, are bytewise big-endian and bitwise little-endian).
+// The first step of encoding a value in Apertium binary format is to determine
+// its "class".  When interpreted as an unsigned integer, a value between 0 and
+// 2**7 - 1 (inclusive) is in the 0th class.  A value between 2**7 and 2**14 -
+// 1 (inclusive) is in the 1st class.  This pattern continues up to and
+// including a value between 2**49 and 2**56 - 1 (inclusive) being in the 7th
+// class, but a value any larger, between 2**56 and 2**64 - 1 (inclusive) is in
+// the 8th class.  While a 64-bit value could be in any one of those classes,
+// an 8-bit value, for example, could be in only the 0th or 1st class.  Thus,
+// when encoding an 8-bit value, the encoding function may make an unnecessary
+// check to determine whether the value is in the 2nd class -- this would
+// happen if the value were between 2**7 and 2**8 - 1 (inclusive).  It is
+// similar for other values less than 64 bits in size.[1]
 //
-// When there are 0 leading ones, as in the following example,
+//    1.  ^ It would not be computationally inefficient not to have an overload
+//          for a data type between 57 and 63 bits in size, were such a data
+//          type to exist.
+//
+// Q: Why does a value's class matter, and
+// Q: how does a value affect the number of bytes used to encode it?
+//
+// Apertium binary format is designed to encode individual values in as few
+// bytes as possible, often encoding a value in fewer bytes than are used to
+// store the value in memory.  What allows this is assuming that any unwritten
+// bits of a value each are equal to zero and all are more significant than all
+// of the value's other bits.  As I/O is a bottleneck for speed, this makes
+// encoding and decoding a value in Apertium binary format quite fast --
+// perhaps faster than without any encoding.[2]
+//
+// A value with more contiguous, most-significant bits equal to zero than
+// another value is, with both values interpreted as unsigned integers, less
+// than the other value.  Of course, a lesser unsigned integer does not always
+// have more contiguous, most-significant bits equal to zero than does a
+// greater unsigned integer, but, if an unsigned integer is sufficiently lesser
+// than another unsigned integer, this is true.  More of the bits of a value
+// with more contiguous, most-significant bits equal to zero than another
+// value may be left unwritten than those of the other value, and so, the
+// number of bytes used to encode a value with sufficiently more contiguous,
+// most-significant bits equal to zero than another value is less than that
+// used to encode the other value.
+//
+// The classes are such that the number of bytes used to encode a value in the
+// i + 1th class is 1 greater than that used to encode a value in the ith
+// class.  1 byte is used to encode a value in the 0th class.  This function
+// must read i + 1 bytes to decode a value in the ith class -- or, as it more
+// specifically does, read i subsequent bytes after reading the first one.
+//
+//    2.  ^ This hypothesis is untested.  This should come down to whether the
+//          time saved by writing fewer bytes is greater than the time required
+//          to format the value for writing.
+//
+// Q: How does this function determine how many bytes to read?
+//
+// Since Apertium binary format must use at least one byte to encode any value,
+// this function first reads one byte from `is`.  The number of contiguous,
+// most-significant bits equal to one in this byte is the number of subsequent
+// bytes that this function must then read to decode the value.  This design is
+// similar to that of UTF-8.  There may be 0 contiguous most-significant bits
+// equal to one in the first byte, but, when there are between 0 and 7
+// (inclusive) most-significant bits equal to one in the first byte, there is a
+// terminating zero.  All of the subsequent bits, including those in subsequent
+// bytes, are the literal bits of the value.  It is important to note that this
+// sequence of bits is bytewise big-endian (and bitwise little-endian).
+// However, when there are 8 contiguous, most-significant bits in the first
+// byte equal to one -- and thus each of the first byte's bits is one -- there
+// is no terminating zero, and thus the 8 subsequent bytes are the literal
+// bytes of the value (and, again, are bytewise big-endian and bitwise
+// little-endian).
+//
+// When there are 0 contiguous most-significant bits equal to one --
+// henceforth, leading ones -- as in the following example,
 //
 //   0b0.......
 //
-// there is a terminating zero followed by 7 bits.  Thus, Apertium binary
-// format encodes all of the integers that ASCII encodes as ASCII encodes them.
-// When there is 1 leading one,
+// there is a terminating zero followed by 7 literal bits of a value.  Recall
+// that a value encoded in 1 byte is in the 0th class and thus between 0 and
+// 2**7 - 1 (inclusive), which is also the range of numbers that ASCII encodes:
+// 0 to 127 (inclusive).  Of course, one could also observe that there are 7
+// literal bits of a value, which can store an unsigned integer between 0 and
+// 2**7 - 1 (inclusive).  Thus, Apertium binary format encodes all of the
+// integers that ASCII encodes as ASCII encodes them.  When there is 1 leading
+// one,
 //
 //   0b10...... ........
 //
-// there is a terminating zero, followed by 6 bits, followed by 1 byte.  When
-// there are 7 leading ones,
+// there is a terminating zero followed by 6 literal bits and then 1 literal
+// byte of a value.  When there are 7 leading ones,
 //
 //   0b11111110 ........ ........ ........ ........ ........ ........ ........
 //
-// there is a terminating zero followed by 7 bytes.
+// there is a terminating zero followed by 7 literal bytes of a value.
 auto read(std::istream &is, std::uint64_t &x) -> decltype(is);
 
 namespace {
 
-// Return the maximum value (interpreted as an unsigned char) of the first byte
-// of a value encoded in Apertium binary format that's mask is `mask`.
+// Return the maximum value (interpreted as an unsigned integer) of a first
+// byte of an Apertium binary format encoding for which the given leading ones
+// are still the leadings ones.
 static constexpr unsigned char get_maximum_c(const unsigned char mask) {
   return ~static_cast<unsigned char>(
       (static_cast<unsigned char>(~mask) + 1ull) >> 1ull);
